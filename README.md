@@ -65,32 +65,49 @@ different addresses. Open two terminals.
 
 **Terminal 1** — press `Ctrl-C` to print the data region and clean up.
 
-Abbreviated real output:
+Abbreviated real output. Terminal 1:
 
 ```
----------------- CREATOR (pid 204402) ----------------      ---------------- ATTACHER (pid 204406) ----------------
-  map base (header) : 0x7a9078f6f000                          map base (header) : 0x726fa3a09000
-  data base         : 0x7a9078f6f040                          data base         : 0x726fa3a09040
-  mapped bytes      : 69632                                   mapped bytes      : 69632
-  magic             : 0x49504331434d4853                      magic             : 0x49504331434d4853
-  version           : 1                                       version           : 1
-  hdr_size          : 64                                      hdr_size          : 64
-  capacity          : 69568                                   capacity          : 69568
-  page_size         : 4096                                    page_size         : 4096
-  cache_line        : 64                                      cache_line        : 64
-------------------------------------------------            ------------------------------------------------
-creator wrote: "HELLO-FROM-CREATOR pid=204402"              reading what the creator left: "HELLO-FROM-CREATOR pid=204402"
-                                                            attacher wrote at offset 64: "HELLO-FROM-ATTACHER pid=204406"
-
-SIGINT received. Reading the data region back:
-  data[0..96] = "WRITTEN-BY-ATTACHER pid=204406"
+---------------- CREATOR (pid 204402) ----------------
+  map base (header) : 0x7a9078f6f000
+  data base         : 0x7a9078f6f040
+  mapped bytes      : 69632
+  magic             : 0x49504331434d4853
+  version           : 1
+  hdr_size          : 64
+  capacity          : 69568
+  page_size         : 4096
+  cache_line        : 64
 ```
+
+Terminal 2:
+
+```
+---------------- ATTACHER (pid 204406) ----------------
+  map base (header) : 0x726fa3a09000
+  data base         : 0x726fa3a09040
+  mapped bytes      : 69632
+  magic             : 0x49504331434d4853
+  version           : 1
+  hdr_size          : 64
+  capacity          : 69568
+  page_size         : 4096
+  cache_line        : 64
+```
+
+Note the two `map base` values: `0x7a9078f6f000` vs `0x726fa3a09000`.
+Different virtual addresses, identical header contents, one physical frame.
 
 The two `map base` values differ — each kernel picked a free range in its own
 process's address space, and ASLR randomised the result — while every header
 field is identical, because both mappings point at the same physical frames.
 The creator's final readback shows a string the attacher wrote, which crossed
-between processes with no syscall and no copy.
+between processes with no syscall and no copy:
+
+```
+SIGINT received. Reading the data region back:
+  data[0..96] = "WRITTEN-BY-ATTACHER pid=204406"
+```
 
 Inspect the raw segment while both are running:
 
