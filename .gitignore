@@ -4,3 +4,4 @@ build/
 *.s
 day1_smoke
 compile_commands.json
+.vscode/
