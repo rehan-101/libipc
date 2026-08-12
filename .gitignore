@@ -1,0 +1,6 @@
+build/
+*.o
+*.so
+*.s
+day1_smoke
+compile_commands.json
