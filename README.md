@@ -4,7 +4,7 @@ A lock-free, zero-copy shared-memory IPC engine in C.
 
 **Day 1 of 7 — shared-memory substrate complete. Ring buffer lands Day 2.**
 
-Today the library creates, publishes, attaches to, and tears down named
+The library currently creates, publishes, attaches to, and tears down named
 shared-memory segments. The data region is raw bytes. There is no ring buffer,
 no message framing, and no shared object yet.
 
@@ -288,13 +288,27 @@ reconciles with the kernel's size. Only then does it map the full segment. A
 rejected segment costs one 4 KiB mapping instead of a commitment to whatever
 length the header claimed.
 
+## Verification
+
+Claims about generated assembly and compiler behaviour in this project are
+not asserted — they're checked against real compiler output. Each day's
+verification report shows the exact commands run, the real instructions
+produced, and the argument connecting evidence to claim.
+
+  [`docs/verification/day1.md`](docs/verification/day1.md) — release/acquire cost nothing on x86-64,
+  plain header stores reorder but never sink past the publish, static
+  helpers inline out of existence
+
+This grows by one entry per day.
+
 ## Project layout
 
 ```
-include/ipc.h          public API; opaque handle, no internals exposed
-src/ipc_segment.c      segment lifecycle over shm_open + mmap
-tests/day1_smoke.c     two-process driver and the SIGBUS demonstration
-Makefile               all, clean, asm
+include/ipc.h            public API; opaque handle, no internals exposed
+src/ipc_segment.c        segment lifecycle over shm_open + mmap
+tests/day1_smoke.c       two-process driver and the SIGBUS demonstration
+docs/verification/       per-day compiler-output verification reports
+Makefile                 all, clean, asm
 ```
 
 ## Roadmap
